@@ -1,0 +1,179 @@
+<router-outlet></router-outlet>
+  <div class="">
+    <div class="container-fluid">
+     <div class="row mb-1">
+       <div class="col bg-primary">
+         <h4 class="text-white m-2">Users control panel</h4>
+       </div>
+     </div>
+      <div class="row min-vh-100">
+        <div class="col-3 bg-light">
+          <form>
+            <!-- NAME/CITY -->
+            <div class="container">
+              <div class="form-group">
+                <label for="tb01NameSearch">Name</label>
+                <input [(ngModel)]="searchName" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="tb01NameSearch" placeholder="Enter a name">
+              </div>
+              <div class="form-group">
+                <label for="tb01CitySearch">City</label>
+                <input [(ngModel)]="searchCity" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="tb01CitySearch" placeholder="Enter a city">
+              </div>
+              <div class="form-check-inline mb-3 mr-3">
+                <input [(ngModel)]="searchActive"  [ngModelOptions]="{standalone: true}" type="checkbox" class="form-check-input" id="tb01UserActiveSearch">
+                <label class="form-check-label" for="tb01UserActiveSearch">User active</label>
+              </div>
+              <div class="form-check-inline mb-3">
+                <input [(ngModel)]="searchInactive"  [ngModelOptions]="{standalone: true}" type="checkbox" class="form-check-input" id="tb01UserInactiveSearch">
+                <label class="form-check-label" for="tb01UserInactiveSearch">User inactive</label>
+              </div>
+              <div class="form-check form-check-inline mb-3">
+                <input [(ngModel)]="searchSortByCreation" value="ASC" class="form-check-input" type="radio" name="sort" id="sortAsc">
+                <label class="form-check-label" for="sortAsc">Creation date ASC</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input [(ngModel)]="searchSortByCreation" value="DESC" class="form-check-input" type="radio" name="sort" id="sortDesc">
+                <label class="form-check-label" for="sortDesc">Creation date DESC</label>
+              </div>
+              <button (click)="findAllByParams()" type="button" class="btn btn-primary btn-block">Search</button>
+              <button (click)="findCities()" data-toggle="modal" data-target="#modalCities" type="button" class="btn btn-primary btn-block mt-2">Search cities</button>
+            </div>
+          </form>
+        </div>
+        <div class="col nopadding">
+          <div *ngIf="users.length==0 && !loadingUsers" class="table-danger m-3">
+            <h4>No results found</h4>
+          </div>
+          <div *ngIf="loadingUsers" class="d-flex justify-content-center min-vh-100 align-items-center">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+
+          <table *ngIf="users.length>0 && !loadingUsers" class="table table-sm">
+            <thead class="bg-primary">
+            <tr class="text-white">
+              <th></th>
+              <th scope="col">Name</th>
+              <th scope="col">Surname</th>
+              <th scope="col">Active</th>
+              <th scope="col">Email</th>
+              <th scope="col">City</th>
+              <th scope="col">D.O.B</th>
+              <th scope="col">Created on</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let user of users | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
+              <td>
+                <button (click)="createUpdateUserForm(user)" data-toggle="modal" data-target="#modalUser" class="btn btn-sm btn-light btn-circle mr-1"><i class="fa fa-edit text-secondary"></i></button>
+                <button (click)="createDelete(user)" class="btn btn-sm btn-light btn-secondary btn-circle"><i class="fa fa-trash text-secondary"></i></button>
+              </td>
+              <td>{{user.tb01Name}}</td>
+              <td>{{user.tb01Surname}}</td>
+              <td>{{user.tb01Active}}</td>
+              <td>{{user.tb01Email}}</td>
+              <td>{{user.tb01City}}</td>
+              <td>{{user.tb01Dob}}</td>
+              <td>{{user.tb01CreatedOn}}</td>
+            </tr>
+            </tbody>
+          </table>
+          <ngb-pagination  *ngIf="users.length>0" [collectionSize]="users.length" [(page)]="page" [maxSize]="5" [rotate]="true" [ellipses]="false" [boundaryLinks]="true"></ngb-pagination>
+          <a (click)="createNewUserForm()" href="#" class="float bg-primary" data-toggle="modal" data-target="#modalUser">
+              <i class="fa fa-plus my-float text-white"></i>
+          </a>
+          <!-- Modal form -->
+          <div class="modal fade" id="modalUser" tabindex="-1" role="dialog" aria-labelledby="modalUserLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalUserLabel">User form</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+
+                  <form>
+
+                    <div class="row">
+                      <div class="col form-group">
+                        <label for="tb01NameForm">Name</label>
+                        <input [(ngModel)]="tb01UserDto.tb01Name" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="tb01NameForm" placeholder="Enter a name">
+                      </div>
+                      <div class="col form-group">
+                        <label for="tb01SurnameForm">Surname</label>
+                        <input [(ngModel)]="tb01UserDto.tb01Surname" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="tb01SurnameForm" placeholder="Enter a surname">
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col form-group">
+                        <label for="tb01CityForm">City</label>
+                        <input [(ngModel)]="tb01UserDto.tb01City" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="tb01CityForm" placeholder="Enter a city">
+                      </div>
+                      <div class="col form-group">
+                        <label for="tb01EmailForm">Email</label>
+                        <input [(ngModel)]="tb01UserDto.tb01Email" [ngModelOptions]="{standalone: true}" type="email" class="form-control" id="tb01EmailForm" placeholder="Enter an email">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col form-group">
+                        <label for="tb01DobForm">Birthday</label>
+                        <input [(ngModel)]="tb01UserDto.tb01Dob" [ngModelOptions]="{standalone: true}" type="date" class="form-control" id="tb01DobForm" placeholder="Enter a birthday">
+                      </div>
+                      <div class="col form-check d-flex align-items-center ml-4">
+                        <input [(ngModel)]="tb01UserDto.tb01Active" [ngModelOptions]="{standalone: true}" type="checkbox" class="form-check-input" id="tb01UserActiveForm">
+                        <label class="form-check-label" for="tb01UserActiveForm">User active</label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button (click)="generateHttpRequest()" type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Modal cities -->
+          <div class="modal fade" id="modalCities" tabindex="-1" role="dialog" aria-labelledby="modalCitiesLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalCitiesLabel">List of cities</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div *ngIf="cities.length>0 && !loadingCities">
+                    <ul *ngFor="let city of cities" class="list-group">
+                      <li class="list-group-item">{{city}}</li>
+                    </ul>
+                  </div>
+
+                  <div *ngIf="cities.length==0 && !loadingCities" class="table-danger m-3">
+                    <h4>No results found</h4>
+                  </div>
+                  <div *ngIf="loadingCities" class="d-flex justify-content-center align-items-center">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
